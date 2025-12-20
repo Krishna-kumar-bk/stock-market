@@ -1,0 +1,65 @@
+/* Wrapper to hold Input + Button */
+.search-bar-wrapper {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* The Text Input Field */
+.search-input {
+  flex: 1; /* Takes up available space */
+  min-width: 0; /* CRITICAL: Allows input to shrink properly */
+  padding: 0 15px;
+  height: 42px; /* Fixed height to match button */
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.search-input:focus {
+  border-color: #3b82f6; /* Blue highlight on focus */
+}
+
+/* The Search Button */
+.search-btn {
+  padding: 0 20px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  height: 42px; /* Fixed height to match input */
+  white-space: nowrap; /* Prevents "Search" text from wrapping */
+}
+
+.search-btn:hover {
+  background: #2563eb;
+}
+
+/* ========================================= */
+/* 📱 MOBILE FIX (Stacks Vertically)         */
+/* ========================================= */
+
+@media (max-width: 600px) {
+  .search-bar-wrapper {
+    flex-direction: column; /* Stack Input on top, Button below */
+    gap: 8px;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .search-btn {
+    width: 100%; /* Make button full width so it's easy to tap */
+    padding: 0;  /* Reset padding since width is 100% */
+  }
+}

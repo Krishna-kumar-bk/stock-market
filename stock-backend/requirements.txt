@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pandas
+numpy
+yfinance
+scikit-learn
+mysql-connector-python
+sqlalchemy
+python-dotenv
+python-multipart
