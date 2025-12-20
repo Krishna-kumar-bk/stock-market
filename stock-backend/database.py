@@ -3,24 +3,31 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
-from urllib.parse import quote_plus  # <--- NEW IMPORT
 
-# Load credentials from .env file
+# Load environment variables
 load_dotenv()
 
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_USER = os.getenv("DB_USER", "root")
-raw_password = os.getenv("DB_PASSWORD", "")
-DB_NAME = os.getenv("DB_NAME", "stock_app")
+# Get database URL from environment variables, fall back to SQLite if not set
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# SAFETY FIX: Encode the password to handle special characters like '@'
-DB_PASS = quote_plus(raw_password)
+if not DATABASE_URL:
+    # Fallback to SQLite for local development
+    DATABASE_URL = "sqlite:///./stockmarket.db"
 
-# Create Database URL
-SQLALCHEMY_DATABASE_URL = f"mysql+mysqlconnector://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
+# For SQLite, we need to add some additional configuration
+if DATABASE_URL.startswith("sqlite"):
+    SQLALCHEMY_DATABASE_URL = DATABASE_URL
+    connect_args = {"check_same_thread": False}
+else:
+    SQLALCHEMY_DATABASE_URL = DATABASE_URL
+    connect_args = {}
 
-# Create Engine
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# Create database engine
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    connect_args=connect_args,
+    pool_pre_ping=True
+)
 
 # Create Session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

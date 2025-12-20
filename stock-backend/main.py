@@ -11,6 +11,11 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from textblob import TextBlob 
 from email.mime.text import MIMEText
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 import smtplib # For sending emails
 import asyncio # For background loops
@@ -42,11 +47,12 @@ app.add_middleware(
 )
 
 # --- CONFIG ---
-# Email configuration
-EMAIL_ADDRESS = "23csec45.krishnakumar@gmail.com" 
-EMAIL_PASSWORD = "kfdvjzfpeyrattpe"  # Make sure this is an App Password, not your regular Gmail password
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587  # For TLS
+# Email configuration from environment variables
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")  # Default to Gmail if not set
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))  # Default to 587 if not set
+SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(32))  # Fallback to random key in development
 
 # --- Pydantic Models (Input Validation) ---
 class UserCreate(BaseModel):
