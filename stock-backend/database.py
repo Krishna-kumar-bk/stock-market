@@ -16,7 +16,7 @@ if not DATABASE_URL:
 
 # For SQLite, we need to add some additional configuration
 if DATABASE_URL.startswith("sqlite"):
-    SQLALCHEMY_DATABASE_URL = DATABASE_URL
+    SQLALCHEMY_DATABASE_URL = DATABASE_URL.replace("sqlite://", "sqlite:///")
     connect_args = {"check_same_thread": False}
 else:
     SQLALCHEMY_DATABASE_URL = DATABASE_URL
@@ -26,7 +26,8 @@ else:
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args=connect_args,
-    pool_pre_ping=True
+    pool_pre_ping=True,
+    echo=True  # Enable SQL query logging for debugging
 )
 
 # Create Session

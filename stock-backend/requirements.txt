@@ -1,16 +1,13 @@
-fastapi
 uvicorn[standard]
 pandas
 numpy
 yfinance
 scikit-learn
-mysql-connector-python
 sqlalchemy
 python-dotenv
 python-multipart
 gunicorn
 passlib[bcrypt]
 python-jose[cryptography]
-python-multipart
 email-validator
 beautifulsoup4
