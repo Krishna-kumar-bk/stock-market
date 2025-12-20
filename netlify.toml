@@ -1,6 +1,12 @@
 [build]
-  command = "cd stock-frontend && npm run build"
-  publish = "stock-frontend/dist"
+  base = "stock-frontend"
+  command = "npm install && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--include=dev"
+  NODE_OPTIONS = "--max_old_space_size=4096"
 
 [[redirects]]
   from = "/*"
