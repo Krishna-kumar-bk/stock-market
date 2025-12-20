@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pandas
 numpy
 yfinance
@@ -8,3 +8,9 @@ mysql-connector-python
 sqlalchemy
 python-dotenv
 python-multipart
+gunicorn
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+email-validator
+beautifulsoup4
