@@ -9,6 +9,11 @@ load_dotenv()
 
 # Get database URL from environment variables, fall back to SQLite if not set
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./stockmarket.db")
+
+# In Render, use /tmp for SQLite database storage
+if os.getenv('RENDER'):
+    DATABASE_URL = "sqlite:////tmp/stockmarket.db"
+
 print(f"Using database URL: {DATABASE_URL}")
 
 # For SQLite, we need to add some additional configuration
@@ -16,6 +21,14 @@ if DATABASE_URL.startswith("sqlite"):
     SQLALCHEMY_DATABASE_URL = DATABASE_URL.replace("sqlite://", "sqlite:///")
     connect_args = {"check_same_thread": False}
     print("Using SQLite database with thread-safe settings")
+    
+    # Ensure the database directory exists
+    if SQLALCHEMY_DATABASE_URL.startswith("sqlite:////"):
+        db_path = SQLALCHEMY_DATABASE_URL.replace("sqlite:///", "")
+        db_dir = os.path.dirname(db_path)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
+            print(f"Ensured database directory exists: {db_dir}")
 else:
     SQLALCHEMY_DATABASE_URL = DATABASE_URL
     connect_args = {}
