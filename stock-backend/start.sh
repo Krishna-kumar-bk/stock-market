@@ -9,17 +9,20 @@ echo "==========================="
 PORT=${PORT:-10000}
 echo "Using port: $PORT"
 
-# Debug: Check if database file exists
-if [ -f "stockmarket.db" ]; then
-    echo "Database file exists"
-    ls -la stockmarket.db
-else
-    echo "Database file does not exist, will be created"
-fi
+# Install textblob and its data
+echo "Installing textblob and its data..."
+pip install textblob
+python -m textblob.download_corpora
 
-# Install dependencies
+# Install other dependencies
 echo "Installing dependencies..."
 pip install -r requirements.txt
+
+# Ensure the database directory exists
+echo "Ensuring database directory exists..."
+mkdir -p /tmp
+chmod 777 /tmp  # Ensure the directory is writable
+ls -la /tmp
 
 # Run database migrations
 echo "Running database migrations..."
