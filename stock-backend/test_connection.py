@@ -2,6 +2,9 @@ from supabase import create_client, Client
 import os
 from dotenv import load_dotenv
 import time
+from database import SessionLocal
+from models import User
+from database import get_password_hash
 
 def test_supabase_connection():
     load_dotenv()
