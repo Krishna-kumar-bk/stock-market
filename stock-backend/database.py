@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get database URL from environment variables
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("dpg-d54btckhg0os739cupi0-a")
 
 if not DATABASE_URL:
     # Local development with SQLite
