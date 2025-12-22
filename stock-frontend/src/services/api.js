@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://stock-market-backend-bk.onrender.com/api"  // Added /api here
+  baseURL: "https://stock-market-26i6.onrender.com/api",
 });
 
 export const fetchQuote = (symbol) => api.get("/stocks/quote", { params: { symbol } });
