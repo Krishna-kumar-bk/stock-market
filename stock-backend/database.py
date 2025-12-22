@@ -4,46 +4,39 @@ from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 # Get database URL from environment variables
-DATABASE_URL = os.getenv("dpg-d54btckhg0os739cupi0-a")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
-    # Local development with SQLite
-    DATABASE_URL = "sqlite:///./stockmarket.db"
-    connect_args = {"check_same_thread": False}
-    print("Using SQLite database for local development")
-else:
-    # For PostgreSQL on Render
-    if DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-    connect_args = {}
-    print("Using PostgreSQL database from DATABASE_URL")
+    raise ValueError("DATABASE_URL environment variable is not set")
+
+# Ensure the connection string is in the correct format
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 try:
     engine = create_engine(
         DATABASE_URL,
-        connect_args=connect_args,
         pool_pre_ping=True,
         echo=True
     )
-    print("Database engine created successfully")
+    print("Successfully connected to Supabase PostgreSQL")
     
-    with engine.connect() as conn:
-        print("Successfully connected to the database")
-        
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    Base = declarative_base()
+
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
 except Exception as e:
-    print(f"Error creating database engine: {str(e)}")
+    print("="*50)
+    print("DATABASE CONNECTION ERROR:")
+    print(f"Error: {str(e)}")
+    print("="*50)
     raise
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
