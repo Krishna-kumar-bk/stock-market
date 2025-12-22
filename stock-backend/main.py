@@ -36,10 +36,14 @@ models.Base.metadata.create_all(bind=engine)
 # Using bcrypt with rounds=12 to prevent the "password too long" error
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 
-# --- 1. CORS Configuration ---
+# --- CORS Configuration ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for now
+    allow_origins=[
+        "http://localhost:3000",  # For local development
+        "https://moonlit-banoffee-1969c1.netlify.app",  # Your Netlify URL
+        "https://stock-market-26i6.onrender.com"  # Your Render backend URL
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
