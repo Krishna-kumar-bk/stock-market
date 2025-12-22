@@ -30,7 +30,12 @@ import models
 app = FastAPI()
 
 # Create Database Tables automatically if they don't exist
-models.Base.metadata.create_all(bind=engine)
+try:
+    models.Base.metadata.create_all(bind=engine)
+    print("Database tables created successfully")
+except Exception as e:
+    print(f"Warning: Could not create database tables: {e}")
+    print("Application will continue, but database operations may fail")
 
 @app.get("/api/health")
 def health_check():
