@@ -34,7 +34,7 @@ models.Base.metadata.create_all(bind=engine)
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "healthy", "database": "connected"}
+    return {"status": "healthy", "database": "connected", "version": "1.0"}
 
 # Password Hashing Configuration
 # Using bcrypt with rounds=12 to prevent the "password too long" error
