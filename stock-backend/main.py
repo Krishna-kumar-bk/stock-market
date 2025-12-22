@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 from passlib.context import CryptContext
 import yfinance as yf
 import pandas as pd
@@ -98,11 +99,11 @@ class AlertCreate(BaseModel):
 
     # --- Add this new Model ---
 class UserUpdate(BaseModel):
-    full_name: str | None = None
-    email: str | None = None
-    current_password: str | None = None
-    new_password: str | None = None
-    confirm_password: str | None = None
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+    current_password: Optional[str] = None
+    new_password: Optional[str] = None
+    confirm_password: Optional[str] = None
 
 # Store password reset tokens in memory (in production, use a database)
 password_reset_tokens = {}
