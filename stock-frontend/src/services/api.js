@@ -1,7 +1,6 @@
-import axios from "axios";
-
+import axios from 'axios';
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: 'https://stock-market-26i6.onrender.com/api',  // Your Render backend URL
 });
 
 export const fetchQuote = (symbol) => api.get("/stocks/quote", { params: { symbol } });
