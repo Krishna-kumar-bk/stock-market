@@ -197,41 +197,61 @@ async def check_price_alerts():
 
 
 def fetch_stock_data(symbol: str):
-    # Force Yahoo Finance to treat it as a ticker
-    # Add session with headers to avoid blocking
+    # Enhanced Yahoo Finance fetch with better error handling
     import requests
     import time
     
+    # Create session with proper headers
     session = requests.Session()
     session.headers.update({
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
         'Accept-Encoding': 'gzip, deflate',
         'Connection': 'keep-alive',
         'Upgrade-Insecure-Requests': '1',
+        'Referer': 'https://finance.yahoo.com/',
     })
     
-    # Try multiple approaches
+    # Try multiple approaches with different strategies
     for attempt in range(3):
         try:
+            # Clear any cached data
+            yf.utils._cache.clear()
+            
             ticker = yf.Ticker(symbol, session=session)
             
-            # Test if we can get basic info
-            test_data = ticker.history(period="1d")
-            if not test_data.empty:
-                return ticker
-                
-            # If empty, wait and retry
-            time.sleep(1)
+            # Test with different periods
+            for period in ["1d", "5d", "1mo"]:
+                try:
+                    test_data = ticker.history(period=period)
+                    if not test_data.empty:
+                        print(f"Successfully fetched data for {symbol} with period {period}")
+                        return ticker
+                except Exception as e:
+                    print(f"Period {period} failed for {symbol}: {e}")
+                    continue
+                    
+            # If all periods fail, wait and retry
+            time.sleep(2)
             
         except Exception as e:
             print(f"Attempt {attempt + 1} failed for {symbol}: {e}")
             if attempt < 2:
-                time.sleep(2)
+                time.sleep(3)
             continue
     
-    # If all attempts fail, return None to trigger fallback
+    # Last resort - try without session
+    try:
+        ticker = yf.Ticker(symbol)
+        test_data = ticker.history(period="1d")
+        if not test_data.empty:
+            print(f"Fallback successful for {symbol}")
+            return ticker
+    except Exception as e:
+        print(f"Fallback also failed for {symbol}: {e}")
+    
+    print(f"All attempts failed for {symbol}")
     return None
 
 def verify_password(plain_password, hashed_password):
