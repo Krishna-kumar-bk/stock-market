@@ -198,7 +198,13 @@ async def check_price_alerts():
 
 def fetch_stock_data(symbol: str):
     # Force Yahoo Finance to treat it as a ticker
-    return yf.Ticker(symbol)
+    # Add session with headers to avoid blocking
+    import requests
+    session = requests.Session()
+    session.headers.update({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    })
+    return yf.Ticker(symbol, session=session)
 
 def verify_password(plain_password, hashed_password):
     try:
