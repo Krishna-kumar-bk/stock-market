@@ -201,6 +201,9 @@ def fetch_stock_data(symbol: str):
     return yf.Ticker(symbol)
 
 def verify_password(plain_password, hashed_password):
+    # Truncate password to 72 bytes max for bcrypt
+    if len(plain_password.encode('utf-8')) > 72:
+        plain_password = plain_password[:72]
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
