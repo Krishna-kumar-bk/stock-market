@@ -732,6 +732,10 @@ def get_history(symbol: str, range: str = "6mo"):
         stock = fetch_stock_data(symbol)
         hist = stock.history(period=p)
         
+        if hist.empty:
+            # Return empty data if no history available
+            return []
+        
         # --- CALCULATE INDICATORS ---
         # SMA 20 (Short term trend - Yellow Line)
         hist['SMA_20'] = hist['Close'].rolling(window=20).mean()
@@ -754,7 +758,8 @@ def get_history(symbol: str, range: str = "6mo"):
         return data
     except Exception as e:
         print(f"Error fetching history for {symbol}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        # Return empty data instead of raising 500 error
+        return []
 
 @app.get("/api/stocks/predict")
 def predict_stock(symbol: str):
