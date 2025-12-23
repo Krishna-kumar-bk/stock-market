@@ -226,7 +226,7 @@ def fetch_stock_data(symbol: str):
                 try:
                     test_data = ticker.history(period=period)
                     if not test_data.empty:
-                        print(f"Successfully fetched data for {symbol} with period {period}")
+                        print(f"Successfully fetched real data for {symbol} with period {period}")
                         return ticker
                 except Exception as e:
                     print(f"Period {period} failed for {symbol}: {e}")
