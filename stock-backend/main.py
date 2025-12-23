@@ -488,31 +488,36 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 def login(user: UserLogin, db: Session = Depends(get_db)):
     print(f"DEBUG: Login attempt for email: {user.email}")
     
-    # 1. Find user by email
-    db_user = db.query(models.User).filter(models.User.email == user.email).first()
-    
-    if not db_user:
-        print(f"DEBUG: User not found in database")
-        raise HTTPException(status_code=400, detail="Invalid email or password")
-    
-    print(f"DEBUG: User found: {db_user.email}")
-    
-    # 2. Verify password
-    password_valid = verify_password(user.password, db_user.password_hash)
-    print(f"DEBUG: Password verification result: {password_valid}")
-    
-    if not password_valid:
-        raise HTTPException(status_code=400, detail="Invalid email or password")
-    
-    # 3. Return success
-    return {
-        "message": "Login successful",
-        "user": {
-            "id": db_user.id,
-            "email": db_user.email,
-            "full_name": db_user.full_name
+    try:
+        # 1. Find user by email
+        db_user = db.query(models.User).filter(models.User.email == user.email).first()
+        
+        if not db_user:
+            print(f"DEBUG: User not found in database")
+            raise HTTPException(status_code=400, detail="Invalid email or password")
+        
+        print(f"DEBUG: User found: {db_user.email}")
+        
+        # 2. Verify password
+        password_valid = verify_password(user.password, db_user.password_hash)
+        print(f"DEBUG: Password verification result: {password_valid}")
+        
+        if not password_valid:
+            raise HTTPException(status_code=400, detail="Invalid email or password")
+        
+        # 3. Return success
+        print(f"DEBUG: Login successful for {db_user.email}")
+        return {
+            "message": "Login successful",
+            "user": {
+                "id": db_user.id,
+                "email": db_user.email,
+                "full_name": db_user.full_name
+            }
         }
-    }
+    except Exception as e:
+        print(f"DEBUG: Login error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
 
 # ==========================
 #  USER PROFILE ENDPOINTS
