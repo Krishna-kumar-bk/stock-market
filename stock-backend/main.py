@@ -574,6 +574,13 @@ def get_quote(symbol: str):
         change = current_price - prev_close
         change_percent = (change / prev_close) * 100
 
+        # Try to get info, but handle errors gracefully
+        try:
+            info = stock.info
+        except Exception as e:
+            print(f"Error getting stock info for {symbol}: {e}")
+            info = {}
+
         # --- MANUAL DESCRIPTIONS FOR INDICES ---
         custom_descriptions = {
             "^NSEI": "The NIFTY 50 is a benchmark Indian stock market index that represents the weighted average of 50 of the largest Indian companies listed on the National Stock Exchange.",
@@ -599,7 +606,7 @@ def get_quote(symbol: str):
             "name": info.get("longName", symbol),
             "sector": info.get("sector", "Index/Crypto"),
             "industry": info.get("industry", "Market"),
-            "description": description, # <--- Updated Logic
+            "description": description,
             "website": info.get("website", "#")
         }
     except Exception as e:
