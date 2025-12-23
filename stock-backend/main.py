@@ -202,8 +202,10 @@ def fetch_stock_data(symbol: str):
 
 def verify_password(plain_password, hashed_password):
     # Truncate password to 72 bytes max for bcrypt
-    if len(plain_password.encode('utf-8')) > 72:
-        plain_password = plain_password[:72]
+    password_bytes = plain_password.encode('utf-8')
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+        plain_password = password_bytes.decode('utf-8', errors='ignore')
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
