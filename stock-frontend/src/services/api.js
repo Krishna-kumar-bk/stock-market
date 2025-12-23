@@ -1,6 +1,6 @@
 import axios from 'axios';
 const api = axios.create({
-  baseURL: 'https://stock-market-26i6.onrender.com/api',  // Your Render backend URL
+  baseURL: import.meta.env.VITE_API_URL || 'https://stock-market-26i6.onrender.com/api',
 });
 
 export const fetchQuote = (symbol) => api.get("/stocks/quote", { params: { symbol } });

@@ -30,4 +30,4 @@ python -c "from database import Base, engine; Base.metadata.create_all(bind=engi
 
 # Start the application using uvicorn
 echo "Starting FastAPI application..."
-exec uvicorn main:app --host 0.0.0.0 --port $PORT --reload
+exec uvicorn main:app --host 0.0.0.0 --port $PORT
