@@ -121,9 +121,12 @@ function Dashboard() {
     try {
       setLoading(true);
       setError("");
-      const [qRes, hRes, pRes, nRes] = await Promise.all([
-        fetchQuote(sym), fetchHistory(sym, "6mo"), fetchPrediction(sym), fetchStockNews(sym)
-      ]);
+      // Sequential calls to avoid overwhelming backend
+      const qRes = await fetchQuote(sym);
+      const hRes = await fetchHistory(sym, "6mo");
+      const pRes = await fetchPrediction(sym);
+      const nRes = await fetchStockNews(sym);
+      
       setQuote(qRes.data);
       setBuyPrice(qRes.data.price); 
       setAlertPrice(qRes.data.price);

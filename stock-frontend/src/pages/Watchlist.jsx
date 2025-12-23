@@ -15,7 +15,9 @@ function Watchlist() {
     if (!user || !watchlist.length) return;
     
     try {
-      const updatedItems = await Promise.all(watchlist.map(async (item) => {
+      // Sequential calls to avoid overwhelming backend
+      const updatedItems = [];
+      for (const item of watchlist) {
         try {
           const quoteRes = await fetchQuote(item.symbol);
           const currentPrice = quoteRes.data.price;
@@ -23,12 +25,14 @@ function Watchlist() {
           const investedValue = item.buy_price * item.quantity;
           const profit = currentValue - investedValue;
           const profitPercent = (profit / investedValue) * 100;
-          return { ...item, currentPrice, profit, profitPercent, currentValue };
+          updatedItems.push({ ...item, currentPrice, profit, profitPercent, currentValue });
+          // Add small delay between requests
+          await new Promise(resolve => setTimeout(resolve, 100));
         } catch (error) {
           console.error(`Error updating price for ${item.symbol}:`, error);
-          return item; // Return the item unchanged if there's an error
+          updatedItems.push(item); // Return the item unchanged if there's an error
         }
-      }));
+      }
       
       setWatchlist(updatedItems);
     } catch (err) {
@@ -60,7 +64,9 @@ function Watchlist() {
       const res = await getWatchlist(user.id);
       const items = res.data;
 
-      const updatedItems = await Promise.all(items.map(async (item) => {
+      // Sequential calls to avoid overwhelming backend
+      const updatedItems = [];
+      for (const item of items) {
         try {
             const quoteRes = await fetchQuote(item.symbol);
             const currentPrice = quoteRes.data.price;
@@ -70,11 +76,13 @@ function Watchlist() {
             const profit = currentValue - investedValue;
             const profitPercent = (profit / investedValue) * 100;
 
-            return { ...item, currentPrice, profit, profitPercent, currentValue };
+            updatedItems.push({ ...item, currentPrice, profit, profitPercent, currentValue });
+            // Add small delay between requests
+            await new Promise(resolve => setTimeout(resolve, 100));
         } catch (error) {
-            return { ...item, currentPrice: 0, profit: 0, profitPercent: 0, currentValue: 0 };
+            updatedItems.push({ ...item, currentPrice: 0, profit: 0, profitPercent: 0, currentValue: 0 });
         }
-      }));
+      }
 
       setWatchlist(updatedItems);
     } catch (err) {
