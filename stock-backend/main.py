@@ -561,9 +561,8 @@ def update_profile(user_id: int, user_update: UserUpdate, db: Session = Depends(
 def get_quote(symbol: str):
     try:
         stock = fetch_stock_data(symbol)
-        info = stock.info
         
-        # Get 5 days of history
+        # Get 5 days of history first
         history = stock.history(period="5d")
         
         if history.empty:
