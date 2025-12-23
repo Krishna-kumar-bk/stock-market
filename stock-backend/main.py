@@ -201,12 +201,16 @@ def fetch_stock_data(symbol: str):
     return yf.Ticker(symbol)
 
 def verify_password(plain_password, hashed_password):
-    # Truncate password to 72 bytes max for bcrypt
-    password_bytes = plain_password.encode('utf-8')
-    if len(password_bytes) > 72:
-        password_bytes = password_bytes[:72]
-        plain_password = password_bytes.decode('utf-8', errors='ignore')
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        # Truncate password to 72 bytes max for bcrypt
+        password_bytes = plain_password.encode('utf-8')
+        if len(password_bytes) > 72:
+            password_bytes = password_bytes[:72]
+            plain_password = password_bytes.decode('utf-8', errors='ignore')
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception as e:
+        print(f"Password verification error: {e}")
+        return False
 
 def get_password_hash(password):
     return pwd_context.hash(password)
@@ -484,42 +488,38 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     
-    return {"message": "User created successfully", "user_id": new_user.id}
+    return {"message": "User created successfully", "user_id": new_user.id, "email": new_user.email, "full_name": new_user.full_name}
 
 @app.post("/api/auth/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
     print(f"DEBUG: Login attempt for email: {user.email}")
     
-    try:
-        # 1. Find user by email
-        db_user = db.query(models.User).filter(models.User.email == user.email).first()
-        
-        if not db_user:
-            print(f"DEBUG: User not found in database")
-            raise HTTPException(status_code=400, detail="Invalid email or password")
-        
-        print(f"DEBUG: User found: {db_user.email}")
-        
-        # 2. Verify password
-        password_valid = verify_password(user.password, db_user.password_hash)
-        print(f"DEBUG: Password verification result: {password_valid}")
-        
-        if not password_valid:
-            raise HTTPException(status_code=400, detail="Invalid email or password")
-        
-        # 3. Return success
-        print(f"DEBUG: Login successful for {db_user.email}")
-        return {
-            "message": "Login successful",
-            "user": {
-                "id": db_user.id,
-                "email": db_user.email,
-                "full_name": db_user.full_name
-            }
+    # 1. Find user by email
+    db_user = db.query(models.User).filter(models.User.email == user.email).first()
+    
+    if not db_user:
+        print(f"DEBUG: User not found in database")
+        raise HTTPException(status_code=400, detail="Invalid email or password")
+    
+    print(f"DEBUG: User found: {db_user.email}")
+    
+    # 2. Verify password
+    password_valid = verify_password(user.password, db_user.password_hash)
+    print(f"DEBUG: Password verification result: {password_valid}")
+    
+    if not password_valid:
+        raise HTTPException(status_code=400, detail="Invalid email or password")
+    
+    # 3. Return success
+    print(f"DEBUG: Login successful for {db_user.email}")
+    return {
+        "message": "Login successful",
+        "user": {
+            "id": db_user.id,
+            "email": db_user.email,
+            "full_name": db_user.full_name
         }
-    except Exception as e:
-        print(f"DEBUG: Login error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
+    }
 
 # ==========================
 #  USER PROFILE ENDPOINTS
