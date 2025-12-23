@@ -149,7 +149,17 @@ function Dashboard() {
       const niceNames = { "^NSEI": "NIFTY 50", "^BSESN": "SENSEX", "BTC-USD": "BITCOIN" };
 
       if (isSilent) {
-        const results = await Promise.all(indices.map(idx => fetchQuote(idx)));
+        // Sequential calls to avoid overwhelming backend
+        const results = [];
+        for (const idx of indices) {
+          try {
+            const res = await fetchQuote(idx);
+            results.push(res);
+          } catch (e) {
+            console.error(`Failed to fetch ${idx}:`, e);
+            results.push({ data: { price: 0, change: 0, changePercent: 0 } });
+          }
+        }
         setMarketIndices(prevIndices => {
             return prevIndices.map((prevItem, index) => {
                 const newData = results[index].data;
@@ -162,15 +172,28 @@ function Dashboard() {
             });
         });
       } else {
-        const results = await Promise.all(indices.map(async (idx) => {
+        // Sequential calls with delay for initial load
+        const results = [];
+        for (let i = 0; i < indices.length; i++) {
+          const idx = indices[i];
+          try {
             const quoteRes = await fetchQuote(idx);
             const historyRes = await fetchHistory(idx, "1mo"); 
-            return { 
+            results.push({ 
                 ...quoteRes.data, 
                 history: historyRes.data || [], 
                 displayName: niceNames[idx] || idx 
-            };
-        }));
+            });
+            // Add small delay between requests
+            if (i < indices.length - 1) await new Promise(resolve => setTimeout(resolve, 200));
+          } catch (e) {
+            console.error(`Failed to fetch ${idx}:`, e);
+            results.push({ 
+                price: 0, change: 0, changePercent: 0, 
+                history: [], displayName: niceNames[idx] || idx 
+            });
+          }
+        }
         setMarketIndices(results);
       }
     } catch (e) { console.error("Market overview error:", e); } finally { if (!isSilent) setLoading(false); }
