@@ -200,11 +200,39 @@ def fetch_stock_data(symbol: str):
     # Force Yahoo Finance to treat it as a ticker
     # Add session with headers to avoid blocking
     import requests
+    import time
+    
     session = requests.Session()
     session.headers.update({
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
     })
-    return yf.Ticker(symbol, session=session)
+    
+    # Try multiple approaches
+    for attempt in range(3):
+        try:
+            ticker = yf.Ticker(symbol, session=session)
+            
+            # Test if we can get basic info
+            test_data = ticker.history(period="1d")
+            if not test_data.empty:
+                return ticker
+                
+            # If empty, wait and retry
+            time.sleep(1)
+            
+        except Exception as e:
+            print(f"Attempt {attempt + 1} failed for {symbol}: {e}")
+            if attempt < 2:
+                time.sleep(2)
+            continue
+    
+    # If all attempts fail, return None to trigger fallback
+    return None
 
 def verify_password(plain_password, hashed_password):
     try:
@@ -579,6 +607,28 @@ def get_quote(symbol: str):
         
         try:
             stock = fetch_stock_data(symbol)
+            
+            # If fetch_stock_data returned None, use fallback
+            if stock is None:
+                if symbol.upper() in fallback_data:
+                    fallback = fallback_data[symbol.upper()]
+                    return {
+                        "symbol": symbol.upper(),
+                        "price": fallback["price"],
+                        "change": fallback["change"],
+                        "changePercent": fallback["changePercent"],
+                        "volume": 0,
+                        "marketCap": 0,
+                        "high52w": 0,
+                        "low52w": 0,
+                        "peRatio": 0,
+                        "name": fallback["name"],
+                        "sector": "Index/Crypto" if symbol.startswith("^") or "-" in symbol else "Technology",
+                        "industry": "Market",
+                        "description": f"{fallback['name']} - Real-time data temporarily unavailable",
+                        "website": "#"
+                    }
+                raise HTTPException(status_code=404, detail="Stock not found")
             
             # Get 5 days of history first
             history = stock.history(period="5d")
